@@ -1,5 +1,7 @@
 # 林承宇 & 陳沛瑜 — 婚禮邀請函 + RSVP
 
+> 接手這個 repo 的新人／新娘請先看 [`docs/HANDOFF.md`](docs/HANDOFF.md)（交接文件，非工程師也看得懂）。
+
 單頁靜態網站：上半是深松綠半圈花環的婚禮邀請函，下半是米白卡片的出席意願表單，送出後寫進 Google Sheet。
 
 技術：Vite 6+ / vanilla TypeScript，零框架；後端用 Google Apps Script Web App（`doPost` 寫入 Sheet），零伺服器；部署到 GitHub Pages。
