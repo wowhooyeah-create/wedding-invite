@@ -175,10 +175,33 @@ function getDataSheet() {
   return ss.getSheets()[0];
 }
 
-/** 第一次送出前，如果資料表還是空的，先補上中文表頭 */
+/**
+ * 確保第一列是中文表頭（HEADERS），不動任何資料列。
+ * - 工作表整個是空的：直接補上一列中文表頭。
+ * - 工作表已經有東西：讀第一列，
+ *   - A1 是 `timestamp`（舊版英文表頭）→ 覆蓋成中文表頭。
+ *   - 第一列跟 HEADERS 不完全一樣，而且 A1 看起來不是日期（代表第一列本來就是某種表頭，
+ *     不是資料列的 timestamp）→ 覆蓋成中文表頭。
+ *   - 第一列已經跟 HEADERS 一模一樣（已經是中文表頭）→ 不動。
+ *   - 其餘情況（例如 A1 是日期，代表第一列其實是資料列，沒有表頭）→ 不動，避免把資料列蓋掉。
+ */
 function ensureHeaderRow(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
+    return;
+  }
+
+  const firstRow = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  const firstCell = firstRow[0];
+
+  const isOldEnglishHeader = firstCell === 'timestamp';
+  const matchesCurrentHeaders = HEADERS.every(function (header, index) {
+    return firstRow[index] === header;
+  });
+  const firstCellLooksLikeDate = firstCell instanceof Date;
+
+  if (isOldEnglishHeader || (!matchesCurrentHeaders && !firstCellLooksLikeDate)) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   }
 }
 
