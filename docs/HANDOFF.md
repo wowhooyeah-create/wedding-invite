@@ -116,7 +116,15 @@
 
 **字型**：中文內文用 `Noto Serif TC`，英文／數字裝飾字用 `Cormorant Garamond`，兩者都是 Google Fonts，已經在 `index.html` 第 10～16 行 `<link>` 進來，`src/style.css` 的 `--font-tc` / `--font-display` 變數對應套用，不用另外安裝字型檔。
 
-**素材原始檔**：目前網站上六張水彩去背 PNG（花環、角花等）跟壓縮腳本要用的原始輸入檔，都在 Chian 那邊，路徑是 `an-agent/100_Todo/projects/wedding-invite/assets/`。之後要換素材，可以請 Chian 給原檔，或你自己出圖後直接覆蓋 `public/art/` 裡對應的同名檔案（做法跟前面「照片怎麼換」一樣：檔名不變，內容換掉即可）。
+**素材原始檔**：網站上六張水彩去背 PNG（花環、角花等）、原始白底輸入檔，以及去背用的腳本，都已經放進這個 repo 的 `design/` 資料夾：
+
+- `design/assets/`：六張去背完成的透明背景 PNG，以及婚紗照佔位圖 `couple.png`
+- `design/assets/raw/`：六張白底原始素材（去背前）
+- `design/tools/`：去背腳本 `unwhite.js` 與用法說明 `design/tools/README.md`
+- `design/DESIGN-SPEC.md`：完整設計規格——配色、字型、尺寸、三個系列各五版的說明、背面結構、信仰元素規則
+- `design/素材需求書.md`：當初委託產出這六張花簇素材的需求書（構圖、prompt），之後要加新素材可以照這份的格式延伸
+
+之後要換素材或調整版型，可以直接照 `design/DESIGN-SPEC.md` 對照 Figma 檔，或自己出圖後直接覆蓋 `public/art/` 裡對應的同名檔案（做法跟前面「照片怎麼換」一樣：檔名不變，內容換掉即可）。
 
 ---
 
