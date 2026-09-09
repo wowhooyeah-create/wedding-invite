@@ -1,0 +1,635 @@
+/* ==========================================================================
+   林承宇 & 陳沛瑜 婚禮邀請函 — 樣式表
+   設計語彙：Editorial Luxury（深松綠 + 米白亞麻 + 霧金），手機優先 RWD
+   ========================================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+  /* 色票：對應 Figma Wedding collection */
+  --pine: #2f4a3b;
+  --pine-deep: #1f3329;
+  --berry: #8c3a3f;
+  --berry-deep: #5e262a;
+  --petal-light: #a64b50;
+  --cream: #f4efe6;
+  --linen: #e6dccb;
+  --gold: #b8975b;
+  --ink: #2b2a28;
+  --bark: #6e4f35;
+
+  /* 半透明版本，方便疊在深色/淺色底上 */
+  --cream-80: rgba(244, 239, 230, 0.8);
+  --cream-60: rgba(244, 239, 230, 0.6);
+  --gold-30: rgba(184, 151, 91, 0.3);
+  --ink-10: rgba(43, 42, 40, 0.1);
+
+  /* 字型 */
+  --font-tc: 'Noto Serif TC', 'PMingLiU', serif;
+  --font-display: 'Cormorant Garamond', 'Noto Serif TC', serif;
+
+  /* 版面 */
+  --content-max: 720px;
+  --gutter: clamp(20px, 6vw, 48px);
+  --section-pad-y: clamp(64px, 12vw, 128px);
+
+  /* 動效：統一用同一條 easing，模擬有重量感的緩入緩出 */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--pine-deep);
+  color: var(--cream);
+  font-family: var(--font-tc);
+  font-weight: 300;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+.section-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--section-pad-y) var(--gutter);
+  text-align: center;
+}
+
+/* 螢幕閱讀器可讀、視覺上完全隱藏（不用 display:none，維持可存取性語意） */
+.hero__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   #hero — 深松綠 + 半圈花環包住「19」
+   ========================================================================== */
+#hero {
+  position: relative;
+  height: 100vh; /* 舊瀏覽器 fallback */
+  height: 100dvh; /* LINE 內建瀏覽器等會動態縮的網址列，用 dvh 才不會跳動 */
+  background: var(--pine-deep);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hero__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(20px, 5vh, 40px) var(--gutter) 0;
+  color: var(--gold);
+}
+
+.hero__eyebrow {
+  font-family: var(--font-display);
+  font-size: clamp(10px, 2.6vw, 13px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero__cross {
+  color: var(--gold);
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.hero__wreath {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: inline-size;
+  padding: 0 var(--gutter) clamp(24px, 6vh, 56px);
+}
+
+.hero__wreath-img {
+  width: clamp(300px, 88vw, 620px);
+  height: auto;
+  margin: 0 auto;
+  /* 花環在 iOS 用 fixed 容易抖動，這裡全部走 absolute/relative + transform，不用 fixed */
+}
+
+.hero__day {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-size: clamp(88px, 22vw, 200px); /* fallback，不支援 cqw 的瀏覽器用這行 */
+  font-size: 46cqw; /* 依花環容器寬度等比縮放，數字永遠框在環內 */
+  user-select: none;
+}
+
+/* ==========================================================================
+   #couple — 新人介紹
+   ========================================================================== */
+#couple {
+  background: var(--pine);
+}
+
+.couple__names {
+  margin: 0 0 20px;
+  font-family: var(--font-tc);
+  font-weight: 300;
+  font-size: clamp(30px, 6vw, 46px);
+  letter-spacing: 0.08em;
+  color: var(--cream);
+}
+
+.couple__amp {
+  display: inline-block;
+  margin: 0 0.4em;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.7em;
+  color: var(--gold);
+}
+
+.couple__invite {
+  margin: 0 auto 48px;
+  max-width: 34ch;
+  font-size: 16px;
+  line-height: 2;
+  color: var(--cream-80);
+}
+
+.couple__photo {
+  margin: 0 auto 48px;
+  padding: 10px;
+  max-width: 300px;
+  background: var(--gold-30);
+  border-radius: 160px 160px 12px 12px;
+}
+
+.couple__photo picture,
+.couple__photo img {
+  border-radius: 150px 150px 6px 6px;
+  overflow: hidden;
+}
+
+.couple__photo img {
+  width: 100%;
+  height: auto;
+}
+
+.couple__verse {
+  border-top: 1px solid var(--gold-30);
+  padding-top: 40px;
+}
+
+.couple__verse-lead {
+  margin: 0 0 16px;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+.couple__verse-text {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--cream-80);
+}
+
+.couple__verse-ref {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   #details — 婚禮資訊
+   ========================================================================== */
+#details {
+  background: var(--pine-deep);
+}
+
+.details__date {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(30px, 6.5vw, 46px);
+  letter-spacing: 0.12em;
+  color: var(--cream);
+}
+
+.details__sub {
+  margin: 0 0 28px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--cream-60);
+}
+
+.details__time {
+  margin: 0 0 40px;
+  font-size: 18px;
+  color: var(--cream);
+}
+
+.details__venue {
+  padding-top: 32px;
+  border-top: 1px solid var(--gold-30);
+}
+
+.details__venue-name {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--cream);
+}
+
+.details__venue-addr,
+.details__venue-phone {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--cream-80);
+}
+
+.details__venue-addr a,
+.details__venue-phone a {
+  text-decoration: underline;
+  text-decoration-color: var(--gold-30);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.3s var(--ease-soft);
+}
+
+.details__venue-addr a:hover,
+.details__venue-phone a:hover {
+  text-decoration-color: var(--gold);
+}
+
+/* ==========================================================================
+   #rsvp — 米白卡片表單
+   ========================================================================== */
+#rsvp {
+  background: var(--pine);
+}
+
+.rsvp__title {
+  margin: 0 0 12px;
+  font-family: var(--font-tc);
+  font-weight: 400;
+  font-size: clamp(22px, 5vw, 28px);
+  color: var(--cream);
+}
+
+.rsvp__deadline {
+  margin: 0 0 40px;
+  font-size: 14px;
+  color: var(--cream-60);
+}
+
+.rsvp-card {
+  background: var(--cream);
+  border-radius: 20px;
+  border: 1px solid rgba(184, 151, 91, 0.25);
+  box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.45);
+  padding: clamp(28px, 6vw, 48px);
+  text-align: left;
+  color: var(--ink);
+}
+
+.field {
+  margin-bottom: 24px;
+}
+
+.field--nested {
+  margin-top: 14px;
+  margin-bottom: 0;
+  padding-left: 2px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* .field-row 設了 display:grid，會蓋掉瀏覽器預設的 [hidden]{display:none}，
+   這裡補回來，否則 JS 設定 hidden 屬性時這個區塊不會真的消失 */
+.field-row[hidden] {
+  display: none;
+}
+
+fieldset.field {
+  border: none;
+  padding: 0;
+  margin-inline: 0;
+}
+
+legend,
+.field > label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--bark);
+  padding: 0;
+}
+
+.req {
+  color: var(--berry);
+}
+
+input[type='text'],
+input[type='tel'],
+input[type='number'],
+textarea {
+  width: 100%;
+  padding: 12px 4px;
+  font: inherit;
+  font-family: var(--font-tc);
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ink-10);
+  border-radius: 0;
+  transition: border-color 0.3s var(--ease-soft);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-bottom-color: var(--gold);
+}
+
+input:invalid.touched {
+  border-bottom-color: var(--berry);
+}
+
+.field__hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: rgba(43, 42, 40, 0.5);
+}
+
+/* 選項用膠囊按鈕呈現，比原生 radio 更好點、也更符合質感 */
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  position: relative;
+  cursor: pointer;
+}
+
+.pill input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pill span {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(43, 42, 40, 0.16);
+  font-size: 14px;
+  color: var(--ink);
+  background: transparent;
+  transition:
+    background 0.3s var(--ease-soft),
+    border-color 0.3s var(--ease-soft),
+    color 0.3s var(--ease-soft);
+}
+
+.pill input:checked + span {
+  background: var(--pine);
+  border-color: var(--pine);
+  color: var(--cream);
+}
+
+.pill input:focus-visible + span {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* 蜜罐欄位：真人看不到，但仍在 DOM 裡（機器人常常照樣填） */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ---------- 送出按鈕 ---------- */
+.btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  border-radius: 999px;
+  transition:
+    transform 0.2s var(--ease-soft),
+    background 0.3s var(--ease-soft),
+    opacity 0.3s var(--ease-soft);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primary {
+  position: relative;
+  width: 100%;
+  margin-top: 12px;
+  padding: 15px 24px;
+  background: var(--pine-deep);
+  color: var(--cream);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn--primary:hover {
+  background: var(--pine);
+}
+
+.btn--primary:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.btn__spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 239, 230, 0.35);
+  border-top-color: var(--cream);
+  animation: spin 0.8s linear infinite;
+}
+
+.btn--primary[aria-busy='true'] .btn__spinner {
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn--ghost {
+  padding: 12px 28px;
+  background: transparent;
+  border: 1px solid var(--gold-30);
+  color: var(--cream);
+}
+
+.btn--ghost:hover {
+  border-color: var(--gold);
+}
+
+.form-error {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--berry);
+}
+
+/* ---------- RSVP 送出結果狀態 ---------- */
+.rsvp-state {
+  background: var(--cream);
+  border-radius: 20px;
+  border: 1px solid rgba(184, 151, 91, 0.25);
+  box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.45);
+  padding: clamp(32px, 7vw, 56px);
+  text-align: center;
+  color: var(--ink);
+}
+
+.rsvp-state__title {
+  margin: 0 0 12px;
+  font-family: var(--font-tc);
+  font-size: 20px;
+  color: var(--pine-deep);
+}
+
+.rsvp-state__summary {
+  margin: 0 0 4px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--bark);
+  white-space: pre-line;
+}
+
+#rsvp-error .btn--ghost {
+  margin-top: 20px;
+  color: var(--ink);
+  border-color: rgba(43, 42, 40, 0.2);
+}
+
+#rsvp-error .btn--ghost:hover {
+  border-color: var(--berry);
+}
+
+/* ==========================================================================
+   footer
+   ========================================================================== */
+#site-footer {
+  background: var(--pine-deep);
+  padding: clamp(48px, 10vw, 80px) var(--gutter);
+  text-align: center;
+}
+
+.footer__quote {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+
+.footer__initials {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.4em;
+  color: var(--cream-60);
+}
+
+/* ==========================================================================
+   桌機以上：內容欄不變寬（max-width 720px 置中即可），
+   僅微調花環與留白比例，維持手機優先的比例節奏
+   ========================================================================== */
+@media (min-width: 1024px) {
+  .couple__invite {
+    font-size: 17px;
+  }
+}
+
+/* 捲動進場動效：由 main.ts 的 IntersectionObserver 加上 .reveal--in 觸發 */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.9s var(--ease-soft),
+    transform 0.9s var(--ease-soft);
+}
+
+.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 動態捲動進場：淡入 + 輕微上移，尊重使用者的減少動態偏好設定 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
