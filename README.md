@@ -72,6 +72,7 @@ scripts/raw/            素材原始檔（不進版控）
 public/art/             壓縮後的 WebP + PNG fallback
 apps-script/            Apps Script 原始碼與部署 SOP
 docs/screenshots/       本機驗收截圖（不進版控）
+design/                 設計資產與設計規格（給設計師調整版型/素材用，見 design/DESIGN-SPEC.md）
 ```
 
 ## 不包含在這次範圍
