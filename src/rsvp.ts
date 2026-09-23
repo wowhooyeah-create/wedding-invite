@@ -1,8 +1,11 @@
 // src/rsvp.ts
 // RSVP 表單：條件邏輯（顯示/隱藏＋清值）、驗證訊息、蜜罐、送出（loading／成功／失敗三態）。
 
-type Attend = 'attend' | 'gift-only' | 'absent';
+type AttendType = 'full' | 'ceremony-only' | 'banquet-only' | 'gift-only' | 'absent';
 type Cake = 'onsite' | 'mail' | 'none';
+
+// 有參加婚宴（需要人數／飲食／兒童椅資訊）的出席類型
+const BANQUET_ATTEND_TYPES: ReadonlySet<AttendType> = new Set(['full', 'banquet-only']);
 
 const RELATION_LABEL: Record<string, string> = {
   groom: '男方親友',
@@ -23,8 +26,10 @@ const CAKE_LABEL: Record<Cake, string> = {
   none: '不需要',
 };
 
-const ATTEND_LABEL: Record<Attend, string> = {
-  attend: '出席',
+const ATTEND_TYPE_LABEL: Record<AttendType, string> = {
+  full: '觀禮＋婚宴',
+  'ceremony-only': '僅觀禮',
+  'banquet-only': '僅婚宴',
   'gift-only': '禮到人不到',
   absent: '無法出席',
 };
@@ -82,11 +87,11 @@ function initRsvpForm(): void {
     });
   });
 
-  // q3 是否出席：只有「出席」才顯示人數／飲食／兒童椅整塊，其餘兩個選項要隱藏並清空
-  form.querySelectorAll<HTMLInputElement>('input[name="attend"]').forEach((input) => {
+  // q3 出席類型：只有參加婚宴（觀禮＋婚宴／僅婚宴）才顯示人數／飲食／兒童椅整塊，其餘選項要隱藏並清空
+  form.querySelectorAll<HTMLInputElement>('input[name="attend_type"]').forEach((input) => {
     input.addEventListener('change', () => {
-      const attend = getRadioValue(form, 'attend') as Attend;
-      const showDetail = attend === 'attend';
+      const attendType = getRadioValue(form, 'attend_type') as AttendType;
+      const showDetail = BANQUET_ATTEND_TYPES.has(attendType);
       setConditionalVisible(form, 'attend-detail', showDetail);
 
       // 出席才把人數／飲食設為必填（radio group 只要組內任一顆有 required 瀏覽器就會要求選擇）
@@ -193,15 +198,15 @@ function initRsvpForm(): void {
   }
 
   function buildSummary(payload: Record<string, string>): string {
-    const attend = payload.attend as Attend;
+    const attendType = payload.attend_type as AttendType;
     const relationLabel = RELATION_LABEL[payload.relation] ?? payload.relation;
     const relationExtra = payload.relation === 'other' && payload.relation_other ? `（${payload.relation_other}）` : '';
     const lines: string[] = [
       `身份：${relationLabel}${relationExtra}`,
-      `出席狀態：${ATTEND_LABEL[attend] ?? payload.attend}`,
+      `出席類型：${ATTEND_TYPE_LABEL[attendType] ?? payload.attend_type}`,
     ];
 
-    if (attend === 'attend') {
+    if (BANQUET_ATTEND_TYPES.has(attendType)) {
       const partySize = payload.party_size === '4+' ? '4 人以上' : `${payload.party_size} 人`;
       lines.push(`出席人數：${partySize}`);
       const dietLabel = DIET_LABEL[payload.diet] ?? payload.diet;

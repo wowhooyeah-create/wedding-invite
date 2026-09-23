@@ -133,17 +133,19 @@
                 </div>
               </fieldset>
 
-              <!-- 3. 是否出席 -->
+              <!-- 3. 出席類型 -->
               <fieldset class="field">
-                <legend>是否出席 <span class="req">＊</span></legend>
-                <div class="pill-group" data-name="attend">
-                  <label class="pill"><input type="radio" name="attend" value="attend" required /><span>出席</span></label>
-                  <label class="pill"><input type="radio" name="attend" value="gift-only" /><span>禮到人不到</span></label>
-                  <label class="pill"><input type="radio" name="attend" value="absent" /><span>無法出席</span></label>
+                <legend>出席類型 <span class="req">＊</span></legend>
+                <div class="pill-group" data-name="attend_type">
+                  <label class="pill"><input type="radio" name="attend_type" value="full" required /><span>觀禮＋婚宴</span></label>
+                  <label class="pill"><input type="radio" name="attend_type" value="ceremony-only" /><span>僅觀禮</span></label>
+                  <label class="pill"><input type="radio" name="attend_type" value="banquet-only" /><span>僅婚宴</span></label>
+                  <label class="pill"><input type="radio" name="attend_type" value="gift-only" /><span>禮到人不到</span></label>
+                  <label class="pill"><input type="radio" name="attend_type" value="absent" /><span>無法出席</span></label>
                 </div>
               </fieldset>
 
-              <!-- 出席才顯示：4. 人數、5. 飲食、6. 兒童椅／餐具 -->
+              <!-- 婚宴（觀禮＋婚宴／僅婚宴）才顯示：4. 人數、5. 飲食、6. 兒童椅／餐具 -->
               <div data-conditional="attend-detail">
                 <!-- 4. 出席人數 -->
                 <fieldset class="field">

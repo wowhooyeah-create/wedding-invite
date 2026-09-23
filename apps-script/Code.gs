@@ -12,17 +12,21 @@
  */
 
 // Sheet 欄位順序：appendRow 會照這個順序把值放進對應欄位
-// A            B     C         D               E       F           G           H     I          J           K               L     M      N        O         P
-// timestamp    name  relation  relation_other  attend  party_size  party_note  diet  diet_note  kids_chair  kids_tableware  cake  phone  address  blessing  user_agent
+// A            B     C         D               E            F           G           H     I          J           K               L     M      N        O         P
+// timestamp    name  relation  relation_other  attend_type  party_size  party_note  diet  diet_note  kids_chair  kids_tableware  cake  phone  address  blessing  user_agent
 //
 // 對照試算表欄位中文標題（HEADERS，跟下面 COLUMNS 一一對應，順序不能改）：
-// 填寫時間 姓名 與新人關係 關係補充 出席狀態 出席人數 同行者備註 飲食 飲食補充 兒童椅（張） 兒童餐具（份） 喜餅領取 聯絡電話 郵寄地址 祝福與備註 瀏覽器
+// 填寫時間 姓名 與新人關係 關係補充 出席類型 出席人數 同行者備註 飲食 飲食補充 兒童椅（張） 兒童餐具（份） 喜餅領取 聯絡電話 郵寄地址 祝福與備註 瀏覽器
+//
+// 出席類型（attend_type）有 5 種，其中只有 full／banquet-only 兩種有參加婚宴，
+// 才會一併收到 party_size／diet／kids_chair／kids_tableware（前端 ceremony-only／
+// gift-only／absent 都不會顯示、也不會送出這幾欄，寫入時維持空字串）。
 const COLUMNS = [
   'timestamp',
   'name',
   'relation',
   'relation_other',
-  'attend',
+  'attend_type',
   'party_size',
   'party_note',
   'diet',
@@ -42,7 +46,7 @@ const HEADERS = [
   '姓名',
   '與新人關係',
   '關係補充',
-  '出席狀態',
+  '出席類型',
   '出席人數',
   '同行者備註',
   '飲食',
@@ -67,8 +71,10 @@ const RELATION_MAP = {
   other: '其他',
 };
 
-const ATTEND_MAP = {
-  attend: '出席',
+const ATTEND_TYPE_MAP = {
+  full: '觀禮＋婚宴',
+  'ceremony-only': '僅觀禮',
+  'banquet-only': '僅婚宴',
   'gift-only': '禮到人不到',
   absent: '無法出席',
 };
@@ -112,8 +118,8 @@ function doPost(e) {
 
     // 最後一道必填檢查：前端已經擋過一次，這裡是防止有人繞過前端直接打 API
     // 注意：這裡檢查的還是前端送來的原始代碼欄位，跟中文化無關
-    if (!data.name || !data.phone || !data.attend) {
-      return jsonResponse({ ok: false, error: 'missing required fields: name / phone / attend' });
+    if (!data.name || !data.phone || !data.attend_type) {
+      return jsonResponse({ ok: false, error: 'missing required fields: name / phone / attend_type' });
     }
 
     const sheet = getDataSheet();
@@ -146,8 +152,8 @@ function translateValue(key, rawValue) {
   switch (key) {
     case 'relation':
       return RELATION_MAP[value] || value;
-    case 'attend':
-      return ATTEND_MAP[value] || value;
+    case 'attend_type':
+      return ATTEND_TYPE_MAP[value] || value;
     case 'party_size':
       return PARTY_SIZE_MAP[value] || value;
     case 'diet':
@@ -216,10 +222,15 @@ function jsonResponse(obj) {
  * 只有想清空重建統計表格式時才需要再跑一次（會先 clear() 清掉舊內容再重建，避免舊公式殘留）。
  *
  * 統計工作表版面配置（各區塊彼此不重疊，都能往下無限長）：
- *   A:C  統計數字（出席組數、出席總人數、各飲食人數、兒童椅／餐具張數）
+ *   A:C  統計數字（婚宴出席組數／人數、僅觀禮組數、各飲食人數、兒童椅／餐具張數）
  *   E:G  喜餅郵寄清單（姓名 / 電話 / 地址）
- *   I:P  出席名單（姓名、關係、人數、飲食、兒童椅、餐具、電話、備註）
- *   R:V  禮到人不到／無法出席名單（姓名、關係、出席狀態、喜餅領取、電話）
+ *   I:P  婚宴出席名單（觀禮＋婚宴／僅婚宴，姓名、關係、人數、飲食、兒童椅、餐具、電話、備註）
+ *   R:V  禮到人不到／無法出席名單（姓名、關係、出席類型、喜餅領取、電話）
+ *   X:AA 僅觀禮名單（不含婚宴，姓名、關係、電話、備註）
+ *
+ * 出席類型五選一（觀禮＋婚宴／僅觀禮／僅婚宴／禮到人不到／無法出席），只有前兩種「有參加婚宴」
+ * 的人才會有人數／飲食／兒童椅／餐具資料，所以葷食/兒童椅這類加總直接對 H/J/K 欄 COUNTIF/SUM
+ * 就好（其餘類型這幾欄前端本來就不會送值、維持空白），不用另外疊加 E 欄條件。
  */
 function setupStatsSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -237,19 +248,26 @@ function setupStatsSheet() {
   // ---------- A:C 統計數字 ----------
   const rows = [
     ['項目', '數值', '說明'],
-    ['出席組數', "=COUNTIF('" + dataName + "'!E:E,\"出席\")", '出席狀態為「出席」的回覆筆數'],
     [
-      '出席總人數',
-      "=SUMPRODUCT(('" +
+      '婚宴出席組數',
+      "=COUNTIF('" + dataName + "'!E:E,\"觀禮＋婚宴\")+COUNTIF('" + dataName + "'!E:E,\"僅婚宴\")",
+      '出席類型為「觀禮＋婚宴」或「僅婚宴」的回覆筆數',
+    ],
+    [
+      '婚宴出席人數',
+      "=SUMPRODUCT((('" +
         dataName +
-        "'!E2:E999=\"出席\")*IFERROR(VALUE(SUBSTITUTE('" +
+        "'!E2:E999=\"觀禮＋婚宴\")+('" +
+        dataName +
+        "'!E2:E999=\"僅婚宴\"))*IFERROR(VALUE(SUBSTITUTE('" +
         dataName +
         "'!F2:F999,\"4 人以上\",\"4\")),0))",
-      '出席人數加總（4 人以上以 4 人計，如需精算請看同行者備註欄）',
+      '婚宴人數加總（4 人以上以 4 人計，如需精算請看同行者備註欄；僅觀禮不吃婚宴不列入）',
     ],
-    ['葷食人數', "=COUNTIFS('" + dataName + "'!E:E,\"出席\",'" + dataName + "'!H:H,\"葷食\")", ''],
-    ['全素／蛋奶素人數', "=COUNTIFS('" + dataName + "'!E:E,\"出席\",'" + dataName + "'!H:H,\"全素／蛋奶素\")", ''],
-    ['其他飲食人數', "=COUNTIFS('" + dataName + "'!E:E,\"出席\",'" + dataName + "'!H:H,\"其他\")", '詳細需求看飲食補充欄'],
+    ['僅觀禮組數', "=COUNTIF('" + dataName + "'!E:E,\"僅觀禮\")", '不含婚宴，人數請看下方「僅觀禮名單」筆數'],
+    ['葷食人數', "=COUNTIF('" + dataName + "'!H:H,\"葷食\")", ''],
+    ['全素／蛋奶素人數', "=COUNTIF('" + dataName + "'!H:H,\"全素／蛋奶素\")", ''],
+    ['其他飲食人數', "=COUNTIF('" + dataName + "'!H:H,\"其他\")", '詳細需求看飲食補充欄'],
     ['兒童椅張數', "=SUM('" + dataName + "'!J:J)", ''],
     ['兒童餐具份數', "=SUM('" + dataName + "'!K:K)", ''],
   ];
@@ -261,23 +279,40 @@ function setupStatsSheet() {
     .getRange('E2')
     .setFormula("=QUERY('" + dataName + "'!A:P,\"select B, M, N where L = '郵寄'\", 1)");
 
-  // ---------- I:P 出席名單 ----------
-  stats.getRange('I1').setValue('出席名單');
-  stats.getRange('I2:P2').setValues([['姓名', '關係', '人數', '飲食', '兒童椅', '餐具', '電話', '備註']]);
+  // ---------- I:P 婚宴出席名單 ----------
+  // 表頭交給 QUERY 的 label 子句自己輸出精簡中文名，不要另外手動塞一行,
+  // 不然 headers=1 會讓 QUERY 自己也印一行表頭（用試算表原始完整表頭文字），變成兩行表頭疊在一起。
+  stats.getRange('I1').setValue('婚宴出席名單（觀禮＋婚宴／僅婚宴）');
   stats
-    .getRange('I3')
+    .getRange('I2')
     .setFormula(
-      "=QUERY('" + dataName + "'!A:P,\"select B, C, F, H, J, K, M, O where E = '出席' order by A\", 1)"
+      "=QUERY('" +
+        dataName +
+        "'!A:P,\"select B, C, F, H, J, K, M, O where E = '觀禮＋婚宴' or E = '僅婚宴' order by A " +
+        "label B '姓名', C '關係', F '人數', H '飲食', J '兒童椅', K '餐具', M '電話', O '備註'\", 1)"
     );
 
   // ---------- R:V 禮到人不到／無法出席名單 ----------
   stats.getRange('R1').setValue('禮到人不到／無法出席名單');
-  stats.getRange('R2:V2').setValues([['姓名', '關係', '出席狀態', '喜餅領取', '電話']]);
   stats
-    .getRange('R3')
+    .getRange('R2')
     .setFormula(
-      "=QUERY('" + dataName + "'!A:P,\"select B, C, E, L, M where E <> '出席' and B <> ''\", 1)"
+      "=QUERY('" +
+        dataName +
+        "'!A:P,\"select B, C, E, L, M where (E = '禮到人不到' or E = '無法出席') and B <> '' " +
+        "label B '姓名', C '關係', E '出席類型', L '喜餅領取', M '電話'\", 1)"
     );
 
-  stats.autoResizeColumns(1, 22);
+  // ---------- X:AA 僅觀禮名單 ----------
+  stats.getRange('X1').setValue('僅觀禮名單（不含婚宴）');
+  stats
+    .getRange('X2')
+    .setFormula(
+      "=QUERY('" +
+        dataName +
+        "'!A:P,\"select B, C, M, O where E = '僅觀禮' order by A " +
+        "label B '姓名', C '關係', M '電話', O '備註'\", 1)"
+    );
+
+  stats.autoResizeColumns(1, 27);
 }
