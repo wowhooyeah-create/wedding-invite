@@ -645,4 +645,10 @@ input:invalid.touched {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* 花環搖擺是唯一的裝飾性動效、幅度小，確認後決定不受此開關影響 */
+  .hero__wreath-img {
+    animation-duration: 6s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
