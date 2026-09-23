@@ -138,17 +138,17 @@ a {
   margin: 0 auto;
   /* 花環在 iOS 用 fixed 容易抖動，這裡全部走 absolute/relative + transform，不用 fixed */
   transform-origin: 50% 20%;
-  animation: wreath-sway 7s ease-in-out infinite;
+  animation: wreath-sway 6s ease-in-out infinite;
 }
 
-/* 花環隨風輕擺：整張圖當一個單位小幅度搖擺，幅度控制在 1 度內避免過於明顯 */
+/* 花環隨風輕擺：整張圖當一個單位搖擺，手機上快速一瞥也要能感受到 */
 @keyframes wreath-sway {
   0%,
   100% {
-    transform: rotate(-0.8deg);
+    transform: rotate(-2deg) translateX(-2px);
   }
   50% {
-    transform: rotate(0.8deg);
+    transform: rotate(2deg) translateX(2px);
   }
 }
 
